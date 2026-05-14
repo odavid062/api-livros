@@ -15,22 +15,22 @@ API REST CRUD de livros com arquitetura em camadas, mapeamento via **MapStruct**
 
 ```mermaid
 flowchart LR
-    Client([Cliente HTTP]) -->|REST JSON| R[BookResource]
+    Client([Cliente HTTP]) -->|JSON| R[BookResource]
 
     subgraph Camadas
-        R -->|IResource| S[BookService]
-        S -->|IService| Rep[BookRepository]
+        R --> S[BookService]
+        S --> Rep[BookRepository]
         Rep --> DB[(PostgreSQL)]
     end
 
     subgraph Mapeamento
-        R <-->|BookDto| M[BookMapper\nMapStruct]
-        M <-->|BookModel| Rep
+        R --> M[BookMapper MapStruct]
+        M --> Rep
     end
 
-    subgraph Tratamento de Erros
-        R -->|exceção| GEH[GlobalExceptionHandler\n@ControllerAdvice]
-        GEH -->|ErrorResponse| Client
+    subgraph Erros
+        R --> GEH[GlobalExceptionHandler]
+        GEH --> Client
     end
 ```
 
