@@ -31,7 +31,7 @@ spring:
     driver-class-name: ${SPRING_DRIVER_CLASS_NAME:org.postgresql.Driver}
     url: ${DATABASE_JDBC_URL:jdbc:postgresql://localhost:5432/postgres}
     username: ${DATABASE_USERNAME:postgres}
-    password: ${DATABASE_PASSWORD:120210}
+    password: ${DATABASE_PASSWORD:changeme}
   jpa:
     hibernate:
       ddl-auto: none #create-drop
