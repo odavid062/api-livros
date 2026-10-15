@@ -105,10 +105,16 @@ IService<T, N>   →  create / read(id) / read() / update / delete
 
 ## Como Executar
 
+### Pré-requisitos
+
+- **Docker** e **Docker Compose** (para execução via contêineres), ou
+- **Java 17** (JDK), **Maven 3.9+** e **PostgreSQL 15** instalados localmente.
+
 ### Com Docker (recomendado)
+
 ```bash
-git clone https://github.com/odavid062/n2Webservice.git
-cd n2Webservice
+git clone https://github.com/odavid062/api-livros.git
+cd api-livros
 docker compose up --build
 ```
 
@@ -119,16 +125,50 @@ docker compose up --build
 | PostgreSQL | localhost:5432 |
 
 ### Com Maven
+
+Acesse a pasta do módulo Maven:
 ```bash
 cd n2Webservice
-./mvnw spring-boot:run
+mvn spring-boot:run
 ```
 
-Configure as variáveis de ambiente antes de executar:
+### Testes
+
+Para executar os testes automatizados via Maven:
 ```bash
+cd n2Webservice
+mvn test
+```
+
+### Variáveis de Ambiente
+
+As configurações utilizam as seguintes variáveis de ambiente (definidas no `application.yaml` e `docker-compose.yml`):
+
+| Variável | Descrição | Valor Padrão |
+|---|---|---|
+| `DATABASE_JDBC_URL` | URL JDBC de conexão com o banco PostgreSQL | `jdbc:postgresql://localhost:5432/postgres` |
+| `DATABASE_USERNAME` | Usuário para autenticação no PostgreSQL | `postgres` |
+| `DATABASE_PASSWORD` | Senha para autenticação no PostgreSQL | `changeme` |
+| `DB_NAME` | Nome do banco de dados (no Docker Compose) | `postgres` |
+| `DB_USERNAME` | Usuário do banco de dados (no Docker Compose) | `postgres` |
+| `DB_PASSWORD` | Senha do banco de dados (no Docker Compose) | `changeme` |
+| `SPRING_DRIVER_CLASS_NAME` | Classe do driver JDBC | `org.postgresql.Driver` |
+| `SPRING_OUTPUT_ANSI_ENABLE` | Habilitação de cores ANSI no log do console | `always` |
+| `SPRING_BANNER_CHARSET` | Codificação de caracteres do banner | `UTF-8` |
+| `SPRING_BANNER_LOCATION` | Caminho do arquivo de banner | `classpath:/banner.txt` |
+| `feature.toggle.print-stacktrace` | Habilita stack trace no corpo do erro HTTP | `false` |
+
+Exemplo de configuração das variáveis antes de executar via Maven:
+```bash
+# Linux / macOS
 export DATABASE_JDBC_URL=jdbc:postgresql://localhost:5432/postgres
 export DATABASE_USERNAME=postgres
 export DATABASE_PASSWORD=sua_senha
+
+# Windows (PowerShell)
+$env:DATABASE_JDBC_URL="jdbc:postgresql://localhost:5432/postgres"
+$env:DATABASE_USERNAME="postgres"
+$env:DATABASE_PASSWORD="sua_senha"
 ```
 
 ---
@@ -171,28 +211,39 @@ curl -X DELETE http://localhost:8080/api/v1/books/1
 ## Estrutura do Projeto
 
 ```
-src/main/java/br/go/senac/ads4/
-├── interfaces/
-│   ├── IResource.java              # Contrato genérico para controllers
-│   └── IService.java               # Contrato genérico para services
-├── model/
-│   └── BookModel.java              # Entidade JPA (id, nome, descricao)
-├── dto/
-│   └── BookDto.java                # DTO de transferência
-├── mapper/
-│   └── BookMapper.java             # MapStruct: BookModel ↔ BookDto
-├── repository/
-│   └── BookRepository.java         # Spring Data JPA
-├── service/
-│   └── BookService.java            # Implementa IService<BookDto, Integer>
-├── resource/
-│   └── BookResource.java           # Implementa IResource<BookDto, Integer>
-├── handler/
-│   ├── GlobalExceptionHandler.java # @ControllerAdvice — todos os HTTP codes
-│   └── ErrorResponse.java          # Resposta padronizada de erro
-└── exception/
-    ├── CustomHttpException.java     # Hierarquia de exceções por código HTTP
-    └── CustomErrorException.java
+.
+├── docker-compose.yml              # Orquestração do banco PostgreSQL e da API
+├── Dockerfile                      # Build multi-stage (Maven + Temurin JRE 17)
+├── README.md                       # Documentação do projeto
+└── n2Webservice/                   # Módulo da aplicação Spring Boot
+    ├── pom.xml                     # Configurações do Maven e dependências
+    └── src/
+        └── main/
+            ├── resources/
+            │   ├── application.yaml # Configurações da aplicação (12-factor)
+            │   └── banner.txt      # Banner customizado de inicialização
+            └── java/br/go/senac/ads4/
+                ├── interfaces/
+                │   ├── IResource.java              # Contrato genérico para controllers
+                │   └── IService.java               # Contrato genérico para services
+                ├── model/
+                │   └── BookModel.java              # Entidade JPA (id, nome, descricao)
+                ├── dto/
+                │   └── BookDto.java                # DTO de transferência
+                ├── mapper/
+                │   └── BookMapper.java             # MapStruct: BookModel ↔ BookDto
+                ├── repository/
+                │   └── BookRepository.java         # Spring Data JPA
+                ├── service/
+                │   └── BookService.java            # Implementa IService<BookDto, Integer>
+                ├── resource/
+                │   └── BookResource.java           # Implementa IResource<BookDto, Integer>
+                ├── handler/
+                │   ├── GlobalExceptionHandler.java # @ControllerAdvice — todos os HTTP codes
+                │   └── ErrorResponse.java          # Resposta padronizada de erro
+                └── exception/
+                    ├── CustomHttpException.java     # Hierarquia de exceções por código HTTP
+                    └── CustomErrorException.java
 ```
 
 ---
